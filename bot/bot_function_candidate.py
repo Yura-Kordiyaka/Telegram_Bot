@@ -1,8 +1,34 @@
-from utilits import add_candidate
+from utilits import *
 from schemas_models import *
+from telebot import types
+import telebot
 
 
 def candidate_handler(bot):
+    # @bot.message_handler(commands=['start'])
+    # def handle_start(message):
+    #     # Створюємо клавіатуру з кнопкою "Почати"
+    #     markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+    #     item = telebot.types.KeyboardButton("Почати")
+    #     markup.add(item)
+    #
+    #     # Відправляємо повідомлення з клавіатурою кнопок
+    #     bot.send_message(message.chat.id, "Вітаємо! Натисніть кнопку 'Почати', щоб розпочати використання бота.",
+    #                      reply_markup=markup)
+    #
+    # @bot.message_handler(func=lambda message: True)
+    # def echo_all(message):
+    #     # Обробляємо всі інші повідомлення
+    #     bot.reply_to(message, message.text)
+
+    @bot.message_handler(commands=["start"])
+    def start_message(message):
+        d=get_all_candidates_with_skills()
+        try:
+            bot.send_message(message.chat.id, f"{d}")
+        except Exception as e:
+            bot.reply_to(message, f'{e}')
+
     @bot.message_handler(commands=['create_candidate'])
     def create_candidate(message):
         try:
@@ -11,6 +37,7 @@ def candidate_handler(bot):
             bot.register_next_step_handler(message, input_info, candidate_info={})
         except Exception as e:
             bot.reply_to(message, 'Помилка. Спробуйте ще раз.')
+
 
     def input_info(message, candidate_info):
         try:
@@ -80,8 +107,7 @@ def candidate_handler(bot):
 
                 candidate_info['skills'].append(message.text)
 
-                msg = bot.send_message(chat_id,
-                                       "Напиши ще одну навичку, або напиши 'готово', якщо завершив введення своїх навичок.")
+                msg = bot.send_message(chat_id,"Напиши ще одну навичку, або напиши 'готово', якщо завершив введення своїх навичок.")
                 bot.register_next_step_handler(msg, input_info_skills, candidate_info)
         except Exception as e:
             bot.reply_to(message, 'Помилка. Спробуйте ще раз.')

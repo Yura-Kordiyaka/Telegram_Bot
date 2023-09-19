@@ -14,12 +14,6 @@ class CandidatesBase(BaseModel):
 class CandidatesCreate(CandidatesBase):
     pass
 
-    @validator('desired_salary')
-    def validate_desired_salary(cls, value):
-        if value <= 0:
-            raise ValueError()
-        return value
-
 
 class Candidates(CandidatesBase):
     id: int
@@ -91,6 +85,23 @@ class ApplicationsCreate(ApplicationsBase):
 
 class Applications(ApplicationsBase):
     id: int
+
+    class Config:
+        orm_mode = True
+
+
+class CandidateResumeBase(BaseModel):
+    candidate_id: int
+    chat_id: int
+
+
+class CandidateResumeCreate(CandidateResumeBase):
+    pass
+
+
+class CandidateResumes(CandidateResumeBase):
+    id: int
+    create_at: datetime
 
     class Config:
         orm_mode = True

@@ -1,7 +1,8 @@
-from sqlalchemy import Boolean, Column, Integer, String, DateTime, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from database_setings import Base
+from db.database_setings import Base
+
 
 class Candidates(Base):
     __tablename__ = "candidates"
@@ -14,7 +15,27 @@ class Candidates(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     desired_salary = Column(Integer, nullable=False)
 
-    skills = relationship("Skills", back_populates='candidate')
+    skills = relationship("Skills", back_populates='candidate', cascade="all, delete-orphan")
+    candidate_resume = relationship("CandidateResume", back_populates='candidate', cascade="all, delete-orphan")
+
+    def to_dict_with_skills(self):
+        candidate_data = {
+            'id': self.id,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'email': self.email,
+            'salary': self.desired_salary,
+            'experience': self.experience,
+            'skills': []
+        }
+
+        for skill in self.skills:
+            skill_data = {
+                'id': skill.id,
+                'skill_name': skill.name,
+            }
+            candidate_data['skills'].append(skill_data)
+        return candidate_data
 
 
 class Skills(Base):
@@ -32,7 +53,7 @@ class JobPositions(Base):
     title = Column(String(300))
     description = Column(Text)
 
-    requirements = relationship("Requirements", back_populates='job_position')
+    requirements = relationship("Requirements", back_populates='job_position', cascade="all, delete-orphan")
 
 
 class Requirements(Base):
@@ -42,9 +63,19 @@ class Requirements(Base):
     job_position = relationship("JobPositions", back_populates='requirements')
     job_position_id = Column(Integer, ForeignKey('job_positions.id'))
 
+
 class Applications(Base):
     __tablename__ = "applications"
     id = Column(Integer, primary_key=True)
     job_position_id = Column(Integer, ForeignKey('job_positions.id'))
-    candidate_id = Column(Integer, ForeignKey('candidates.id'))
+    candidate_id = Column(Integer, ForeignKey('candidates.id'), nullable=True)
     status = Column(String(250), nullable=False)
+
+
+class CandidateResume(Base):
+    __tablename__ = "candidate_resume"
+    id = Column(Integer, primary_key=True)
+    candidate_id = Column(Integer, ForeignKey('candidates.id'), nullable=False)
+    chat_id = Column(Integer, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    candidate = relationship("Candidates", back_populates='candidate_resume')

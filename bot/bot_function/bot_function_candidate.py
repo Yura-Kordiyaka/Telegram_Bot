@@ -85,15 +85,21 @@ def candidate_handler(bot):
     def input_info_salary(message, candidate_info):
         chat_id = message.chat.id
         try:
-            candidate_info['salary'] = int(message.text)
-            if candidate_info['salary'] > 0:
-                msg = bot.send_message(chat_id,
-                                       f"Thank you, {candidate_info['first_name']} {candidate_info['last_name']}! Now, enter your experience.")
-                bot.register_next_step_handler(msg, input_info_experience, candidate_info)
+            if message.text.isdigit():
+                candidate_info['salary'] = int(message.text)
+                if candidate_info['salary'] > 0:
+                    msg = bot.send_message(chat_id,
+                                           f"Thank you, {candidate_info['first_name']} {candidate_info['last_name']}! Now, enter your experience.")
+                    bot.register_next_step_handler(msg, input_info_experience, candidate_info)
+                else:
+                    msg = bot.send_message(chat_id,
+                                           f"Input valid salary,salary must be grater then 0, please try again")
+                    bot.register_next_step_handler(msg, input_info_salary, candidate_info)
             else:
                 msg = bot.send_message(chat_id,
-                                       f"Input valid salary,salary must be grater then 0, please try again")
+                                       f"Input valid salary,salary must contain only digit")
                 bot.register_next_step_handler(msg, input_info_salary, candidate_info)
+
         except Exception as e:
             bot.reply_to(message, 'Error. Please try again.')
 
@@ -144,7 +150,7 @@ def candidate_handler(bot):
             skills_to_add = [SkillsCreate(name=skill_dict.get('skill_name', '')) for skill_dict in user_skills]
             candidate = add_candidate(new_candidate, skills_to_add)
 
-            bot.send_message(chat_id,print_resume(candidate_info))
+            bot.send_message(chat_id, print_resume(candidate_info))
 
             candidate_resume_data = CandidateResumeCreate(
                 candidate_id=candidate.id,

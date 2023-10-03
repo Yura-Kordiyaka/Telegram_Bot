@@ -1,5 +1,6 @@
 def print_resume(candidate_info):
     first_name = candidate_info['first_name']
+    desired_job_position = candidate_info['desired_job_position']
     last_name = candidate_info['last_name']
     email = candidate_info['email']
     salary = candidate_info['salary']
@@ -12,6 +13,7 @@ def print_resume(candidate_info):
         all_skills_user += '\t\t' + skill_name + '\n'
 
     message = f"Name: {first_name} {last_name}\n"
+    message += f"Desired position: {desired_job_position}\n"
     message += f"Work Experience: {experience}\n"
     message += f"Desired Salary: {salary}\n"
     message += f"Email: {email}\n"

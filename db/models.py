@@ -17,6 +17,7 @@ class Candidates(Base):
 
     skills = relationship("Skills", back_populates='candidate', cascade="all, delete-orphan")
     candidate_resume = relationship("CandidateResume", back_populates='candidate', cascade="all, delete-orphan")
+    desired_job_position = Column(String(300),nullable=False)
 
     def to_dict_with_skills(self):
         candidate_data = {
@@ -26,7 +27,8 @@ class Candidates(Base):
             'email': self.email,
             'salary': self.desired_salary,
             'experience': self.experience,
-            'skills': []
+            'desired_job_position': self.desired_job_position,
+            'skills': [],
         }
 
         for skill in self.skills:

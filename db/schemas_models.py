@@ -4,6 +4,7 @@ from datetime import datetime
 
 
 class CandidatesBase(BaseModel):
+    desired_job_position: str
     email: str
     first_name: str
     last_name: str

@@ -231,10 +231,12 @@ def candidate_handler(bot):
             programming_language = employer_requirements['programming_language']
             experience_level = employer_requirements['experience_level']
             all_candidates = search_candidates_by_language_and_level(programming_language, experience_level)
-            i = 0
+            if_candidates_exists = 0
             for candidate in all_candidates:
-                    candidate = print_resume(candidate)
-                    bot.send_message(chat_id, f"{candidate}")
+                candidate = print_resume(candidate)
+                bot.send_message(chat_id, f"{candidate}")
+                if_candidates_exists += 1
+            if if_candidates_exists == 0:
+                bot.send_message(chat_id, f"there are no candidates with such requirements")
         except Exception as e:
             bot.reply_to(call.message, f'Error. Please try again {e}')
-

@@ -40,7 +40,6 @@ def candidate_handler(bot):
     @bot.callback_query_handler(func=lambda call: call.data == 'have_resume')
     def handle_have_resume(call):
         chat_id = call.message.chat.id
-
         if get_candidate_resume(chat_id):
             show_candidate_resume(call.message)
         else:
@@ -91,12 +90,25 @@ def candidate_handler(bot):
                 candidate_info['email'] = message.text
 
                 msg = bot.send_message(chat_id,
-                                       f"Thank you, {candidate_info['first_name']} {candidate_info['last_name']}! Now, enter your desired salary.")
-                bot.register_next_step_handler(msg, input_info_salary, candidate_info)
+                                       f"Thank you, {candidate_info['first_name']} {candidate_info['last_name']}! Now,"
+                                       f" enter "
+                                       f"your main skill like python or js")
+                bot.register_next_step_handler(msg, input_main_skill, candidate_info)
             else:
                 msg = bot.send_message(chat_id,
                                        f"Input valid email, please try again")
                 bot.register_next_step_handler(msg, input_info_email, candidate_info)
+        except Exception as e:
+            bot.reply_to(message, 'Error. Please try again.')
+
+    def input_main_skill(message, candidate_info):
+        try:
+            chat_id = message.chat.id
+            candidate_info['main_skill'] = message.text
+
+            msg = bot.send_message(chat_id,
+                                       f"Thank you, {candidate_info['first_name']} {candidate_info['last_name']}! Now, enter your desired salary.")
+            bot.register_next_step_handler(msg, input_info_salary, candidate_info)
         except Exception as e:
             bot.reply_to(message, 'Error. Please try again.')
 
@@ -140,12 +152,19 @@ def candidate_handler(bot):
             else:
                 if 'skills' not in candidate_info:
                     candidate_info['skills'] = []
+                if any(skill['skill_name'].lower() == message.text.lower() for skill in candidate_info['skills']):
 
-                candidate_info['skills'].append({'skill_name': message.text})
+                    msg = bot.send_message(chat_id,
+                                           "you have already entered this school, please enter another,"
+                                           "or type 'done' if you've finished entering your skills")
+                    bot.register_next_step_handler(msg, input_info_skills, candidate_info)
+                else:
+                    candidate_info['skills'].append({'skill_name': message.text})
 
-                msg = bot.send_message(chat_id,
-                                       "Enter another skill, or type 'done' if you've finished entering your skills.")
-                bot.register_next_step_handler(msg, input_info_skills, candidate_info)
+                    msg = bot.send_message(chat_id,
+                                           "Enter another skill, or type 'done' if you've finished"
+                                           " entering your skills.")
+                    bot.register_next_step_handler(msg, input_info_skills, candidate_info)
         except Exception as e:
             bot.reply_to(message, 'Error. Please try again.')
 
@@ -153,6 +172,7 @@ def candidate_handler(bot):
         try:
             first_name = candidate_info['first_name']
             last_name = candidate_info['last_name']
+            main_skill=candidate_info['main_skill']
             email = candidate_info['email']
             salary = candidate_info['salary']
             experience = candidate_info['experience']
@@ -165,6 +185,7 @@ def candidate_handler(bot):
                 email=email,
                 first_name=first_name,
                 last_name=last_name,
+                main_skill=main_skill,
                 experience=experience,
                 desired_salary=salary,
             )
@@ -185,7 +206,6 @@ def candidate_handler(bot):
         chat_id = message.chat.id
         candidate_resume = get_candidate_resume(chat_id)
         try:
-
             bot.send_message(chat_id,
                              f'{print_resume(candidate_resume)}')
         except Exception as e:

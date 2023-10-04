@@ -1,6 +1,6 @@
 from db.database_setings import db
 from db.models import Candidates, Skills, JobPositions, Requirements, CandidateResume
-from sqlalchemy import func, and_
+from sqlalchemy import func, and_, or_
 from db.schemas_models import CandidatesCreate, SkillsCreate, List, JobPositionsCreate, RequirementsCreate, \
     CandidateResumeCreate
 
@@ -61,10 +61,16 @@ def search_candidates_by_language_and_level(programming_language, experience_lev
         db.query(Candidates)
         .join(Skills)
         .filter(
-            and_(
-                func.lower(Skills.name) == func.lower(programming_language),
-                func.lower(Candidates.desired_job_position).like(func.lower(f"%{experience_level}%"))
+            or_(
+                and_(
+                    func.lower(Skills.name) == func.lower(programming_language),
+                    func.lower(Candidates.desired_job_position).like(func.lower(f"%{experience_level}%"))
+                ),
+                func.lower(Candidates.main_skill) == func.lower(programming_language)
             )
+        )
+        .order_by(
+            func.lower(Candidates.main_skill) != func.lower(programming_language),
         )
         .all()
     )

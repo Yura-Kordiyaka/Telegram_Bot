@@ -11,13 +11,14 @@ class Candidates(Base):
     email = Column(String(250), unique=True, nullable=False)
     first_name = Column(String(150), nullable=False)
     last_name = Column(String(150), nullable=False)
+    main_skill = Column(String(150), nullable=False)
     experience = Column(String(150), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     desired_salary = Column(Integer, nullable=False)
 
     skills = relationship("Skills", back_populates='candidate', cascade="all, delete-orphan")
     candidate_resume = relationship("CandidateResume", back_populates='candidate', cascade="all, delete-orphan")
-    desired_job_position = Column(String(300),nullable=False)
+    desired_job_position = Column(String(300), nullable=False)
 
     def to_dict_with_skills(self):
         candidate_data = {
@@ -25,6 +26,7 @@ class Candidates(Base):
             'first_name': self.first_name,
             'last_name': self.last_name,
             'email': self.email,
+            'main_skill': self.main_skill,
             'salary': self.desired_salary,
             'experience': self.experience,
             'desired_job_position': self.desired_job_position,

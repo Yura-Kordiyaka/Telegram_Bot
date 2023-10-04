@@ -8,6 +8,7 @@ class CandidatesBase(BaseModel):
     email: str
     first_name: str
     last_name: str
+    main_skill: str
     experience: str
     desired_salary: int
 

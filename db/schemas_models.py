@@ -19,7 +19,6 @@ class CandidatesCreate(CandidatesBase):
 
 class Candidates(CandidatesBase):
     id: int
-    created_at: datetime
     skills: List["Skills"] = []
 
     class Config:
@@ -45,6 +44,7 @@ class Skills(SkillsBase):
 class JobPositionsBase(BaseModel):
     title: str
     description: str
+    salary: int
 
 
 class JobPositionsCreate(JobPositionsBase):

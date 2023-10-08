@@ -56,8 +56,26 @@ class JobPositions(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String(300))
     description = Column(Text)
-
+    created_at = Column(DateTime, default=datetime.utcnow)
+    salary = Column(Integer, nullable=False)
     requirements = relationship("Requirements", back_populates='job_position', cascade="all, delete-orphan")
+
+    def to_dict_with_skills(self):
+        job_position = {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'salary': self.salary,
+            'requirements': [],
+        }
+
+        for requirement in self.requirements:
+            requirement_data = {
+                'id': requirement.id,
+                'requirement': requirement.name,
+            }
+            job_position['requirements'].append(requirement_data)
+        return job_position
 
 
 class Requirements(Base):

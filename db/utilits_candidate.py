@@ -41,32 +41,23 @@ def get_candidate_with_skills(id):
         return candidate.to_dict_with_skills()
 
 
-def add_vacancy(vacancy_data: JobPositionsCreate, requirements: List[RequirementsCreate]):
-    new_job_position = JobPositions(**vacancy_data.dict())
 
-    db.add(new_job_position)
-    db.commit()
-    db.refresh(new_job_position)
-
-    for requirement in requirements:
-        db_requirement = Requirements(**requirement.dict(), job_position_id=new_job_position.id)
-        db.add(db_requirement)
-
-    db.commit()
-    return new_job_position
 
 
 def search_candidates_by_language_and_level(programming_language, experience_level):
     candidates = (
         db.query(Candidates)
-        .join(Skills)
+        .join(Skills, Candidates.id == Skills.candidate_id)
         .filter(
             or_(
                 and_(
                     func.lower(Skills.name) == func.lower(programming_language),
                     func.lower(Candidates.desired_job_position).like(func.lower(f"%{experience_level}%"))
                 ),
-                func.lower(Candidates.main_skill) == func.lower(programming_language)
+                and_(
+                    func.lower(Candidates.main_skill) == func.lower(programming_language),
+                    func.lower(Candidates.desired_job_position).like(func.lower(f"%{experience_level}%"))
+                )
             )
         )
         .order_by(

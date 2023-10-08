@@ -11,13 +11,37 @@ def print_resume(candidate_info):
     all_skills_user = ""
     for skill_dict in user_skills:
         skill_name = skill_dict.get('skill_name', '')
-        all_skills_user += '\t\t' + skill_name + '\n'
+        all_skills_user += '\t\t• ' + skill_name + '\n'
 
-    message = f"Name: {first_name} {last_name}\n"
-    message += f"Desired position: {desired_job_position}\n"
-    message += f"Work Experience: {experience}\n"
-    message += f"Desired Salary: {salary}\n"
-    message += f"Email: {email}\n"
-    message += f"Main skill: {main_skill}\n"
-    message += f"Skills:\n{all_skills_user}"
+    message = (
+        "📝 Resume 📝\n\n"
+        f"👤 Name: {first_name} {last_name}\n"
+        f"🎯 Desired Position: {desired_job_position}\n"
+        f"⏳ Work Experience: {experience}\n"
+        f"💰 Desired Salary: {salary}\n"
+        f"📧 Email: {email}\n"
+        f"💡 Main Skill: {main_skill}\n"
+        f"🛠 Skills:\n{all_skills_user}"
+    )
+    return message
+
+
+def print_vacancy(vacancy_info):
+    title = vacancy_info['title']
+    description = vacancy_info['description']
+    salary = vacancy_info['salary']
+    requirements_for_job = vacancy_info.get('requirements', [])
+
+    all_requirements = ""
+    for requirement_dict in requirements_for_job:
+        requirement_name = requirement_dict.get('requirement_name', '')
+        all_requirements += '\t\t• ' + requirement_name + '\n'
+
+    message = (
+        "💼 Job Vacancy 💼\n\n"
+        f"👤 Position: {title}\n"
+        f"🎯 Description: {description}\n"
+        f"💰 Salary: {salary}\n"
+        f"🛠 Requirements:\n{all_requirements}"
+    )
     return message

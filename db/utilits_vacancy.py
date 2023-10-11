@@ -1,8 +1,8 @@
 from db.database_setings import db
-from db.models import Candidates, Skills, JobPositions, Requirements, CandidateResume
-from sqlalchemy import func, and_, or_
-from db.schemas_models import CandidatesCreate, SkillsCreate, List, JobPositionsCreate, RequirementsCreate, \
-    CandidateResumeCreate
+from db.models import Candidates, Skills, JobPositions, Requirements, CandidateResume, Recruiters
+from sqlalchemy import func, or_
+from db.schemas_models import List, JobPositionsCreate, RequirementsCreate, \
+ RecruiterCreate
 
 
 def add_vacancy(vacancy_data: JobPositionsCreate, requirements: List[RequirementsCreate]):
@@ -41,3 +41,22 @@ def get_all_candidates_by_requirements(job_position_id: int):
     )
 
     return candidates_with_matching_skills
+
+
+def add_recruiter_vacancy(recruiter_add: RecruiterCreate):
+    new_recruiter_resume_data = Recruiters(**recruiter_add.dict())
+    db.add(new_recruiter_resume_data)
+    db.commit()
+    return new_recruiter_resume_data
+
+
+def check_recruiter_time(chat_id):
+    recent_recruiters = (
+        db.query(Recruiters)
+        .filter(Recruiters.chat_id == chat_id)
+        .order_by(Recruiters.created_at)
+        .limit(3)
+        .all()
+    )
+    recent_recruiters_dicts = [recruiter.to_dict() for recruiter in recent_recruiters]
+    return recent_recruiters_dicts

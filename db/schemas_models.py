@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel
 from typing import List
 from datetime import datetime
 
@@ -107,3 +107,24 @@ class CandidateResumes(CandidateResumeBase):
 
     class Config:
         orm_mode = True
+
+
+class RecruiterBase(BaseModel):
+    chat_id: int
+    job_position_id: int
+
+
+class RecruiterCreate(RecruiterBase):
+    pass
+
+
+class Recruiter(RecruiterBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class RecruiterList(Recruiter):
+    pass

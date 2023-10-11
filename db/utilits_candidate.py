@@ -1,7 +1,7 @@
 from db.database_setings import db
-from db.models import Candidates, Skills, JobPositions, Requirements, CandidateResume
+from db.models import Candidates, Skills, CandidateResume
 from sqlalchemy import func, and_, or_
-from db.schemas_models import CandidatesCreate, SkillsCreate, List, JobPositionsCreate, RequirementsCreate, \
+from db.schemas_models import CandidatesCreate, SkillsCreate, List,  \
     CandidateResumeCreate
 
 

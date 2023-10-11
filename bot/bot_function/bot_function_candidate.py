@@ -1,9 +1,9 @@
 from telebot import types
 
-from db.schemas_models import *
+
 from db.utilits_candidate import *
 from db.validation import validate_email
-from programming_languages import programming_languages, experience_levels
+
 from .bot_print_message import *
 
 
@@ -212,57 +212,3 @@ def candidate_handler(bot):
         except Exception as e:
             bot.reply_to(message, f'❗❗❗Error. Please try again {e}')
 
-
-
-
-    # @bot.callback_query_handler(func=lambda call: call.data == "recruiter")
-    # def handle_employer(call):
-    #     keyboard = types.InlineKeyboardMarkup()
-    #     try:
-    #         chat_id = call.message.chat.id
-    #         for programming_language in programming_languages:
-    #             selected_language = programming_language.split(" ")[0]
-    #             add_programming_language = types.InlineKeyboardButton(text=f"{programming_language}",
-    #                                                                   callback_data=f"add_programming_language:{selected_language}")
-    #             keyboard.add(add_programming_language)
-    #         bot.send_message(chat_id, f"select programming language", reply_markup=keyboard)
-    #     except Exception as e:
-    #         bot.reply_to(call.message, f'❗❗❗Error. Please try again {e}')
-    #
-    # employer_requirements = {}
-    #
-    # @bot.callback_query_handler(func=lambda call: call.data.startswith("add_programming_language:"))
-    # def handle_programming_language(call):
-    #     chat_id = call.message.chat.id
-    #     keyboard = types.InlineKeyboardMarkup()
-    #     try:
-    #         programming_language = call.data.split(":")[1]
-    #         employer_requirements['programming_language'] = programming_language
-    #         for experience_level in experience_levels:
-    #             selected_level = experience_level.split(' ')
-    #             add_experience_level = types.InlineKeyboardButton(text=f"{experience_level}",
-    #                                                               callback_data=f"add_experience_level:{selected_level}")
-    #             keyboard.add(add_experience_level)
-    #         bot.send_message(chat_id, f"select the level of experience you need",
-    #                          reply_markup=keyboard)
-    #     except Exception as e:
-    #         bot.reply_to(call.message, f'❗❗❗Error. Please try again {e}')
-    #
-    # @bot.callback_query_handler(func=lambda call: call.data.startswith("add_experience_level:"))
-    # def handle_search_candidates(call):
-    #     try:
-    #         chat_id = call.message.chat.id
-    #         experience_level = call.data.split(":")[1]
-    #         employer_requirements['experience_level'] = experience_level
-    #         programming_language = employer_requirements['programming_language']
-    #         experience_level = employer_requirements['experience_level']
-    #         all_candidates = search_candidates_by_language_and_level(programming_language, experience_level)
-    #         if_candidates_exists = 0
-    #         for candidate in all_candidates:
-    #             candidate = print_resume(candidate)
-    #             bot.send_message(chat_id, f"{candidate}")
-    #             if_candidates_exists += 1
-    #         if if_candidates_exists == 0:
-    #             bot.send_message(chat_id, f"unfortunately, there are no candidates with such requirements 😢")
-    #     except Exception as e:
-    #         bot.reply_to(call.message, f'❗❗❗Error. Please try again {e}')

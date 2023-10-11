@@ -58,6 +58,7 @@ class JobPositions(Base):
     description = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
     salary = Column(Integer, nullable=False)
+    recruiters_vacancy = relationship("Recruiters", back_populates='job_position', cascade="all, delete-orphan")
     requirements = relationship("Requirements", back_populates='job_position', cascade="all, delete-orphan")
 
     def to_dict_with_skills(self):
@@ -86,14 +87,6 @@ class Requirements(Base):
     job_position_id = Column(Integer, ForeignKey('job_positions.id'))
 
 
-class Applications(Base):
-    __tablename__ = "applications"
-    id = Column(Integer, primary_key=True)
-    job_position_id = Column(Integer, ForeignKey('job_positions.id'))
-    candidate_id = Column(Integer, ForeignKey('candidates.id'), nullable=True)
-    status = Column(String(250), nullable=False)
-
-
 class CandidateResume(Base):
     __tablename__ = "candidate_resume"
     id = Column(Integer, primary_key=True)
@@ -101,3 +94,20 @@ class CandidateResume(Base):
     chat_id = Column(Integer, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     candidate = relationship("Candidates", back_populates='candidate_resume')
+
+
+class Recruiters(Base):
+    __tablename__ = "recruiters_vacancy"
+    id = Column(Integer, primary_key=True)
+    job_position = relationship("JobPositions", back_populates='recruiters_vacancy')
+    job_position_id = Column(Integer, ForeignKey('job_positions.id'))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    chat_id = Column(Integer, nullable=False)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "job_position_id": self.job_position_id,
+            "created_at": self.created_at,
+            "chat_id": self.chat_id,
+        }

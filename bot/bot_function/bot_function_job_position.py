@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from db.utilits_vacancy import *
 from db.utilits_candidate import *
 from db.schemas_models import *
@@ -79,10 +81,18 @@ def vacancy_handler(bot):
     def create_vacancy(call):
         try:
             chat_id = call.message.chat.id
-            msg = bot.send_message(chat_id, f"Please, enter the name of job position 🎯🎯🎯")
-            bot.register_next_step_handler(msg, input_info_job_position, vacancy_data={})
+            recent_recruiters_dicts=check_recruiter_time(chat_id)
+            current_time = datetime.utcnow()
+            one_hour_ago = current_time - timedelta(hours=1)
+            recent_recruiters_last_hour = [recruiter for recruiter in recent_recruiters_dicts if
+                                           recruiter['created_at'] >= one_hour_ago]
+            if len(recent_recruiters_last_hour) >= 3:
+                bot.send_message(chat_id, 'the recruiter can add no more than 3 vacancies per hour')
+            else:
+                msg = bot.send_message(chat_id, f"Please, enter the name of job position 🎯🎯🎯 ")
+                bot.register_next_step_handler(msg, input_info_job_position, vacancy_data={})
         except Exception as e:
-            bot.reply_to(call.message, '❗❗❗Error. Please try again.')
+            bot.reply_to(call.message, f'❗❗❗Error. Please try again.{e}')
 
     def input_info_job_position(message, vacancy_data):
         try:
@@ -168,6 +178,12 @@ def vacancy_handler(bot):
 
             added_vacancy = add_vacancy(new_vacancy, requirements_to_add)
 
+            new_vacancy_for_recruiter = RecruiterCreate(
+                job_position_id=added_vacancy.id,
+                chat_id=chat_id,
+            )
+            new_recruiter = add_recruiter_vacancy(new_vacancy_for_recruiter)
+
             msg = bot.send_message(chat_id, print_vacancy(vacancy_data))
             vacancy_data['vacancy_id'] = added_vacancy.id
             send_message_to_candidates(message, vacancy_data)
@@ -185,121 +201,3 @@ def vacancy_handler(bot):
         except Exception as e:
             bot.reply_to(message, f'❗❗❗Error. Please try again {e}')
 
-# @bot.callback_query_handler(func=lambda call: call.data == "recruiter")
-# def handle_employer(call):
-#     keyboard = types.InlineKeyboardMarkup()
-#     try:
-#         chat_id = call.message.chat.id
-#         for programming_language in programming_languages:
-#             selected_language = programming_language.split(" ")[0]
-#             add_programming_language = types.InlineKeyboardButton(text=f"{programming_language}",
-#                                                                   callback_data=f"add_programming_language:{selected_language}")
-#             keyboard.add(add_programming_language)
-#         bot.send_message(chat_id, f"select programming language", reply_markup=keyboard)
-#     except Exception as e:
-#         bot.reply_to(call.message, f'❗❗❗Error. Please try again {e}')
-#
-# employer_requirements = {}
-#
-# @bot.callback_query_handler(func=lambda call: call.data.startswith("add_programming_language:"))
-# def handle_programming_language(call):
-#     chat_id = call.message.chat.id
-#     keyboard = types.InlineKeyboardMarkup()
-#     try:
-#         programming_language = call.data.split(":")[1]
-#         employer_requirements['programming_language'] = programming_language
-#         for experience_level in experience_levels:
-#             selected_level = experience_level.split(' ')
-#             add_experience_level = types.InlineKeyboardButton(text=f"{experience_level}",
-#                                                               callback_data=f"add_experience_level:{selected_level}")
-#             keyboard.add(add_experience_level)
-#         bot.send_message(chat_id, f"select the level of experience you need",
-#                          reply_markup=keyboard)
-#     except Exception as e:
-#         bot.reply_to(call.message, f'❗❗❗Error. Please try again {e}')
-#
-# @bot.callback_query_handler(func=lambda call: call.data.startswith("add_experience_level:"))
-# def handle_search_candidates(call):
-#     try:
-#         chat_id = call.message.chat.id
-#         experience_level = call.data.split(":")[1]
-#         employer_requirements['experience_level'] = experience_level
-#         programming_language = employer_requirements['programming_language']
-#         experience_level = employer_requirements['experience_level']
-#         all_candidates = search_candidates_by_language_and_level(programming_language, experience_level)
-#         if_candidates_exists = 0
-#         for candidate in all_candidates:
-#             candidate = print_resume(candidate)
-#             bot.send_message(chat_id, f"{candidate}")
-#             if_candidates_exists += 1
-#         if if_candidates_exists == 0:
-#             bot.send_message(chat_id, f"unfortunately, there are no candidates with such requirements 😢")
-#     except Exception as e:
-#         bot.reply_to(call.message, f'❗❗❗Error. Please try again {e}')
-
-# @bot.message_handler(commands=['create_vacancy'])
-# def create_candidate(message):
-#     try:
-#         chat_id = message.chat.id
-#         bot.send_message(chat_id, "Привіт! Введи сюда назву вакансії.")
-#         bot.register_next_step_handler(message, vacancy_info={})
-#     except Exception as e:
-#         bot.reply_to(message, 'Помилка. Спробуйте ще раз.')
-
-#     def input_info(message, vacancy_info):
-#         try:
-#             chat_id = message.chat.id
-#             vacancy_info['title'] = message.text
-#             msg = bot.send_message(chat_id, f"Дякую,тепер напишіть навички  по однії які потрібні  для цієї роботи ")
-#             bot.register_next_step_handler(msg, input_info_requirements, vacancy_info)
-#         except Exception as e:
-#             bot.reply_to(message, 'Помилка. Спробуйте ще раз.')
-#
-#     def input_info_requirements(message, vacancy_info):
-#         try:
-#             chat_id = message.chat.id
-#             if message.text.lower() == 'готово':
-#                 msg = bot.send_message(chat_id,
-#                                        f"Дякую,тепер опишіть більш детельно саму вакансію  ")
-#                 bot.register_next_step_handler(msg, input_info_description, vacancy_info)
-#             else:
-#                 if 'requirements' not in vacancy_info:
-#                     vacancy_info['requirements'] = []
-#
-#                 vacancy_info['requirements'].append(message.text)
-#
-#                 msg = bot.send_message(chat_id,
-#                                        "Напиши ще одну навичку, або напишить 'готово', якщо завершили введення навичок які потрібні для цієї роботи")
-#                 bot.register_next_step_handler(msg, input_info_requirements, vacancy_info)
-#
-#         except Exception as e:
-#             bot.reply_to(message, 'Помилка. Спробуйте ще раз.')
-#
-#     def input_info_description(message, vacancy_info):
-#         try:
-#             vacancy_info['description'] = message.text
-#
-#             save_data(message, vacancy_info)
-#         except Exception as e:
-#             bot.reply_to(message, 'Помилка. Спробуйте ще раз.')
-#
-#     def save_data(message, vacancy_info):
-#         try:
-#             title_vacancy = vacancy_info['title']
-#             description = vacancy_info['description']
-#             requirements = vacancy_info.get('requirements', [])
-#             chat_id = message.chat.id
-#             new_vacancy = JobPositionsCreate(
-#                 title=title_vacancy,
-#                 description=description
-#             )
-#             all_requirements = "\n"
-#             for i in requirements:
-#                 all_requirements += '\t\t' + i + '\n'
-#             requirements_to_add = [RequirementsCreate(name=i) for i in requirements]
-#             add_vacancy(new_vacancy, requirements_to_add)
-#             bot.send_message(chat_id, f"назва посади : {title_vacancy}\n"
-#                                       f"обов'язки які потрібно мати :{all_requirements}"
-#                                       f"більш детально про роботу : {description}")
-#         except Exception as e:
-#             bot.reply_to(message, f'Помилка. Спробуйте ще раз {e}')
